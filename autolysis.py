@@ -11,6 +11,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+csv_file = sys.argv[1]
+if len(sys.argv) != 2:
+    print("Usage: uv run b.py <csv_file>")
+    sys.exit(1)
 
 def save_plot(fig, filename):
     filepath = os.path.join(os.getcwd(), filename)
@@ -19,9 +23,7 @@ def save_plot(fig, filename):
 
 
 def read_dataset(file_path):
-    """
-    Read the dataset with proper encoding detection and handling.
-    """
+ 
     with open(file_path, "rb") as f:
         raw_data = f.read()
         result = detect(raw_data)
@@ -33,16 +35,16 @@ def read_dataset(file_path):
         print(f"Error reading file: {e}")
         return None
     return df
-
-
 def generate_(file_path):
-    directory = file_path.split(".")[0]
+    directory = str(file_path).split(".")[0]
     if not os.path.exists(directory):
-        os.mkdir(directory)
+        os.makedirs(directory)
     data = read_dataset(file_path)
     generate_visualizations_in_dir(data, directory)
     narrated_story = generate_story(data)
     create_README(data, directory, narrated_story)
+
+
 
 
 def generate_visualizations_in_dir(data, directory):
@@ -97,7 +99,6 @@ def create_README(data: pd.DataFrame, directory, narrated_story):
 
 def generate_story(data):
     token = os.getenv("AIPROXY_TOKEN")
-    print("got the env", token)
     if token is None:
         print("Error: AIPROXY_TOKEN environment variable not set.")
         sys.exit(1)
@@ -135,7 +136,4 @@ def generate_story(data):
         print(f"Error parsing response: {e}")
         sys.exit(1)
 
-
-generate_("happiness.csv")
-generate_("media.csv")
-generate_("goodreads.csv")
+generate_(csv_file)
